@@ -9,6 +9,8 @@ using System.Security.Principal;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
+
 
 namespace PacketBeatInstaller
 {
@@ -103,22 +105,17 @@ namespace PacketBeatInstaller
 
 
                     // 선택된 디바이스로 yml 파일을 작성한다
-                    string yml_text = @"
-interfaces:
-  device: _DEVICE_NUMBER_
+                    var assembly = Assembly.GetExecutingAssembly();
+                    var resourceName = "PacketBeatInstaller.Resources.ConfigTemplate.txt";
 
-protocols:
-  http:
-    ports: [_GAME_PORT_]
-    send_request: true
-    send_response: true
-    
-    include_body_for: [""text/html"", ""application/json""]
+                    string yml_text;
 
-output:
-  logstash:
-    hosts: [""_LOGSTASH_""]
-";
+                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        yml_text = reader.ReadToEnd();
+                    }
+
                     yml_text = yml_text.
                         Replace("_DEVICE_NUMBER_", device_index.ToString()).
                         Replace("_GAME_PORT_", "80").

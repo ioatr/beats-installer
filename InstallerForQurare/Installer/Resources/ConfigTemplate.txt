@@ -1,0 +1,14 @@
+﻿interfaces:
+  device: _DEVICE_NUMBER_
+
+protocols:
+  http:
+    ports: [_GAME_PORT_]
+    send_request: true
+    send_response: true
+    
+    include_body_for: ["text/html", "application/json"]
+
+output:
+  logstash:
+    hosts: ["_LOGSTASH_"]
