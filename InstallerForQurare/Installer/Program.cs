@@ -9,12 +9,15 @@ using System.Security.Principal;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
+using IniParser;
+using IniParser.Model;
 
 namespace PacketBeatInstaller
 {
     class Program
     {
         public const string PACKETBEAT_SERVICE_NAME = "PacketBeat";
+        public const string PACKETBEAT_INSTALLER_INI = "PacketBeatInstaller.ini";
 
         static void Main(string[] args)
         {
@@ -34,6 +37,8 @@ namespace PacketBeatInstaller
 
                     return; // 관리자 모드로 실행하고 종료
                 }
+
+                var config = ParseINI();
 
                 // program files 밑에 packetbeat 폴더를 작성한다
                 string path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
@@ -60,8 +65,8 @@ namespace PacketBeatInstaller
 
                 yml_text = yml_text.
                     Replace("_DEVICE_NUMBER_", device_index.ToString()).
-                    Replace("_GAME_PORT_", "80").
-                    Replace("_LOGSTASH_", "logstash.qurare.atr-api.com:5044");
+                    Replace("_GAME_PORT_", config.Port.ToString()).
+                    Replace("_LOGSTASH_", config.Logstash);
 
                 using (var writer = new StreamWriter(Path.Combine(path, "packetbeat.yml")))
                 {
@@ -88,6 +93,23 @@ namespace PacketBeatInstaller
             {
                 Console.Error.WriteLine(e.Message);
             }
+        }
+
+        private static Config ParseINI()
+        {
+            if ( File.Exists(PACKETBEAT_INSTALLER_INI) == false )
+            {
+                throw new Exception(string.Format("{0} 파일을 찾을 수 없습니다", PACKETBEAT_INSTALLER_INI));
+            }
+
+            var parser = new FileIniDataParser();
+            IniData data = parser.ReadFile("PacketBeatInstaller.ini");
+
+            var config = new Config();
+            config.Port = int.Parse(data["PacketBeat"]["Port"]);
+            config.Logstash = data["PacketBeat"]["Logstash"].ToString();
+
+            return config;
         }
 
         private static void DoConfigTest(string path)
