@@ -103,7 +103,7 @@ namespace PacketBeatInstaller
             }
 
             var parser = new FileIniDataParser();
-            IniData data = parser.ReadFile("PacketBeatInstaller.ini");
+            IniData data = parser.ReadFile(PACKETBEAT_INSTALLER_INI);
 
             var config = new Config();
             config.Port = int.Parse(data["PacketBeat"]["Port"]);
