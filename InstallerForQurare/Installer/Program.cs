@@ -21,6 +21,8 @@ namespace PacketBeatInstaller
 
         static void Main(string[] args)
         {
+            bool forceExit = false;
+
             try
             {
                 // 파일들은 모두 압축이 풀려있다고 가정하자
@@ -35,6 +37,7 @@ namespace PacketBeatInstaller
                     procInfo.Verb = "runas";
                     var p = Process.Start(procInfo);
 
+                    forceExit = true;
                     return; // 관리자 모드로 실행하고 종료
                 }
 
@@ -92,6 +95,15 @@ namespace PacketBeatInstaller
             catch (Exception e)
             {
                 Console.Error.WriteLine(e.Message);
+            }
+            finally
+            {
+                if (!forceExit)
+                {
+                    // 입력이 있어야 종료
+                    Console.WriteLine("Press any key to exit.");
+                    Console.ReadKey();
+                }
             }
         }
 
